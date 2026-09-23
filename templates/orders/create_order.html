@@ -1,32 +1,70 @@
 {% extends "base.html" %}
 {% block page_title %}Create New Order{% endblock %}
 {% block sidebar %}{% include "partials/sidebar_sales_agent.html" %}{% endblock %}
+
 {% block content %}
-<h4>Sales Order Form</h4>
-<p class="text-muted">Prepare a new customer booking/cargo order record</p>
-<div class="card">
+<div class="kq-page-header">
+    <h4><i class="bi bi-plus-circle me-2" style="color: var(--kq-primary);"></i>Sales Order Form</h4>
+    <p class="text-muted">Prepare a new customer booking / cargo order record</p>
+</div>
+
+<div class="card" style="max-width: 900px;">
     <div class="card-body">
-        <label class="form-label fw-semibold">Customer / Account Selector</label>
-        <select class="form-select mb-3">
-            <option>Select an account...</option>
-        </select>
-        <table class="table">
-            <thead>
-                <tr><th>Product / Service Line Item</th><th>Qty</th><th>Unit Price (USD)</th><th>Line Total (USD)</th><th></th></tr>
-            </thead>
-            <tbody>
-                {# TODO: dynamic order item rows #}
-            </tbody>
-        </table>
-        <button class="btn btn-outline-secondary btn-sm">+ Add Item Line</button>
-        <div class="text-end mt-3">
-            <div>Subtotal: <span class="fw-semibold">$0.00</span></div>
-            <div>VAT (16%): <span class="fw-semibold">$0.00</span></div>
-            <div class="fs-5">Running Total (USD): <span class="fw-bold">$0.00</span></div>
+        <div class="mb-3">
+            <label class="form-label">Customer / Account Selector</label>
+            <select class="form-select">
+                <option value="">Select an account...</option>
+            </select>
         </div>
-        <div class="text-end mt-3">
-            <button class="btn btn-outline-secondary">Reset Form</button>
-            <button class="btn btn-dark">Submit Order</button>
+
+        <div class="table-responsive mb-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product / Service Line Item</th>
+                        <th style="width: 100px;">Qty</th>
+                        <th style="width: 140px;">Unit Price (USD)</th>
+                        <th style="width: 140px;">Line Total (USD)</th>
+                        <th style="width: 50px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# TODO: dynamic order item rows — Phase 1 implementation #}
+                    <tr>
+                        <td colspan="5" class="text-muted text-center py-3">
+                            <i class="bi bi-cart-plus me-1"></i>Add items below
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button class="btn btn-outline-secondary btn-sm mb-4">
+            <i class="bi bi-plus-lg me-1"></i>Add Item Line
+        </button>
+
+        <div class="rounded-3 p-3 mb-3" style="background: var(--kq-surface-alt);">
+            <div class="d-flex justify-content-between mb-1">
+                <span class="text-muted small">Subtotal</span>
+                <span class="fw-semibold">$0.00</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+                <span class="text-muted small">VAT (16%)</span>
+                <span class="fw-semibold">$0.00</span>
+            </div>
+            <div class="d-flex justify-content-between pt-2" style="border-top: 1px solid var(--kq-border);">
+                <span class="fw-bold">Running Total (USD)</span>
+                <span class="fw-bold fs-5" style="color: var(--kq-primary);">$0.00</span>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+            <button class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+            </button>
+            <button class="btn btn-dark">
+                <i class="bi bi-check-lg me-1"></i>Submit Order
+            </button>
         </div>
     </div>
 </div>

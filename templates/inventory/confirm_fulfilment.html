@@ -1,28 +1,62 @@
 {% extends "base.html" %}
 {% block page_title %}Warehouse Fulfilment Queue{% endblock %}
 {% block sidebar %}{% include "partials/sidebar_warehouse_officer.html" %}{% endblock %}
+
 {% block content %}
-<h4>Pending Order Queue</h4>
-<p class="text-muted">Verify payload specs and confirm stock package dispatch</p>
-<table class="table">
-    <thead>
-        <tr><th>Order Ref ID</th><th>Customer Account</th><th>Payload Items Breakdown</th><th>Logistics Date</th><th>Dispatch Action</th></tr>
-    </thead>
-    <tbody>
-        {% for order in orders %}
-        <tr>
-            <td>KQ-{{ order.order_id }}</td>
-            <td>{{ order.customer.name }}</td>
-            <td>{# TODO: item breakdown #}</td>
-            <td>{{ order.order_date|date:"M d, Y" }}</td>
-            <td>
-                <form method="post" action="{% url 'inventory:confirm_order' order.order_id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-dark btn-sm">Confirm Fulfilled</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="kq-page-header">
+    <h4><i class="bi bi-box-seam me-2" style="color: var(--kq-primary);"></i>Pending Order Queue</h4>
+    <p class="text-muted">Verify payload specs and confirm stock package dispatch</p>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Order Ref ID</th>
+                        <th>Customer Account</th>
+                        <th>Payload Items</th>
+                        <th>Logistics Date</th>
+                        <th>Dispatch Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td class="fw-semibold">KQ-{{ order.order_id }}</td>
+                        <td>{{ order.customer.name }}</td>
+                        <td>
+                            {% for item in order.items.all %}
+                            <span class="small">{{ item.quantity }}x {{ item.product.name }}{% if not forloop.last %},{% endif %}</span>
+                            {% empty %}
+                            <span class="text-muted small">No items</span>
+                            {% endfor %}
+                        </td>
+                        <td>{{ order.order_date|date:"M d, Y" }}</td>
+                        <td>
+                            <form method="post" action="{% url 'inventory:confirm_order' order.order_id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-dark btn-sm">
+                                    <i class="bi bi-check2-circle me-1"></i>Confirm Fulfilled
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="kq-empty-state">
+                                <i class="bi bi-check-circle" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                                <p class="mt-2 mb-1 fw-semibold">No pending orders</p>
+                                <p class="small text-muted">All confirmed orders have been fulfilled</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

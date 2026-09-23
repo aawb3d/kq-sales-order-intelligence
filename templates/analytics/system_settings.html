@@ -1,32 +1,60 @@
 {% extends "base.html" %}
 {% block page_title %}Console Settings{% endblock %}
 {% block sidebar %}{% include "partials/sidebar_system_administrator.html" %}{% endblock %}
+
 {% block content %}
-<h4>System Configuration Parameters</h4>
-<p class="text-muted">Calibrate machine learning thresholds and automated notifications</p>
-<div class="card card-body" style="max-width: 700px;">
-    <div class="fw-semibold mb-2">Demand Forecasting Parameters</div>
-    <div class="row mb-3">
-        <div class="col">
-            <label class="form-label">ML Confidence Threshold</label>
-            <input type="number" step="0.01" class="form-control" value="0.85">
+<div class="kq-page-header">
+    <h4><i class="bi bi-gear me-2" style="color: var(--kq-primary);"></i>System Configuration Parameters</h4>
+    <p class="text-muted">Calibrate machine learning thresholds and automated notifications</p>
+</div>
+
+<div class="card" style="max-width: 720px;">
+    <div class="card-body">
+        <!-- ML Parameters -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="rounded-3 d-flex align-items-center justify-content-center"
+                 style="width: 32px; height: 32px; background: var(--kq-info-bg);">
+                <i class="bi bi-cpu" style="color: var(--kq-info);"></i>
+            </div>
+            <h6 class="fw-bold mb-0">Demand Forecasting Parameters</h6>
         </div>
-        <div class="col">
-            <label class="form-label">Forecasting Cache Timeout (mins)</label>
-            <input type="number" class="form-control" value="60">
+        <div class="row mb-4">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <label class="form-label">ML Confidence Threshold</label>
+                <input type="number" step="0.01" class="form-control" value="0.85">
+            </div>
+            <div class="col-sm-6">
+                <label class="form-label">Forecasting Cache Timeout (mins)</label>
+                <input type="number" class="form-control" value="60">
+            </div>
         </div>
-    </div>
-    <div class="fw-semibold mb-2">Notification Dispatch Channels</div>
-    <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" checked>
-        <label class="form-check-label">Send immediate Email Alerts to Operations Manager on high-priority ML anomalies</label>
-    </div>
-    <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" checked>
-        <label class="form-check-label">Notify Warehouse Officer immediately on critical low stock components</label>
-    </div>
-    <div class="text-end">
-        <button class="btn btn-dark">Save Configuration Settings</button>
+
+        <!-- Notifications -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="rounded-3 d-flex align-items-center justify-content-center"
+                 style="width: 32px; height: 32px; background: var(--kq-warning-bg);">
+                <i class="bi bi-bell" style="color: var(--kq-warning);"></i>
+            </div>
+            <h6 class="fw-bold mb-0">Notification Dispatch Channels</h6>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" checked id="anomalyAlert">
+            <label class="form-check-label" for="anomalyAlert">
+                Send immediate email alerts to Operations Manager on high-priority ML anomalies
+            </label>
+        </div>
+        <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" checked id="stockAlert">
+            <label class="form-check-label" for="stockAlert">
+                Notify Warehouse Officer immediately on critical low stock components
+            </label>
+        </div>
+
+        <div class="text-end pt-3" style="border-top: 1px solid var(--kq-border-light);">
+            <button class="btn btn-dark">
+                <i class="bi bi-check-lg me-1"></i>Save Configuration
+            </button>
+        </div>
     </div>
 </div>
 {% endblock %}

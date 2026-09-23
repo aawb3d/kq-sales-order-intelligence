@@ -1,4 +1,15 @@
-<div class="text-muted small mb-3">System Admin</div>
+<div class="kq-sidebar-label">System Admin</div>
 <ul class="nav flex-column">
-    <li class="nav-item"><a class="nav-link" href="{% url 'analytics:system_settings' %}">System Settings</a></li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'analytics:system_settings' %}">
+            <span class="nav-icon"><i class="bi bi-gear"></i></span>
+            System Settings
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'accounts:manage_users' %}">
+            <span class="nav-icon"><i class="bi bi-shield-lock"></i></span>
+            Manage Users
+        </a>
+    </li>
 </ul>

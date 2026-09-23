@@ -1,63 +1,88 @@
 {% extends "base.html" %}
 {% block page_title %}Customer Directory{% endblock %}
 {% block sidebar %}{% include "partials/sidebar_sales_agent.html" %}{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h4 class="mb-0">Customer Directory</h4>
-        <p class="text-muted">Review client contact data and unified booking metrics</p>
+<div class="kq-page-header">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h4><i class="bi bi-people me-2" style="color: var(--kq-primary);"></i>Customer Directory</h4>
+            <p class="text-muted">Review client contact data and unified booking metrics</p>
+        </div>
+        <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#newCustomerModal">
+            <i class="bi bi-person-plus me-1"></i> New Customer
+        </button>
     </div>
-    <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#newCustomerModal">+ New Customer</button>
 </div>
 
-{% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-{% endif %}
+<div class="card">
+    <div class="card-body p-0">
+        <!-- Search bar -->
+        <div class="p-3" style="border-bottom: 1px solid var(--kq-border-light);">
+            <form method="get">
+                <div class="input-group" style="max-width: 500px;">
+                    <span class="input-group-text" style="background: var(--kq-surface-alt); border-color: var(--kq-border);">
+                        <i class="bi bi-search" style="color: var(--kq-text-muted);"></i>
+                    </span>
+                    <input type="text" name="q" class="form-control"
+                           placeholder="Search customers by name, company, email, phone..."
+                           value="{{ query }}" onchange="this.form.submit()">
+                </div>
+            </form>
+        </div>
 
-<form method="get" class="mb-3">
-    <input
-        type="text"
-        name="q"
-        class="form-control"
-        style="max-width: 500px;"
-        placeholder="Search customers by name, company, email, phone..."
-        value="{{ query }}"
-        onchange="this.form.submit()"
-    >
-</form>
+        <!-- Customers table -->
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Account / Contact Name</th>
+                        <th>Contact Info</th>
+                        <th>Corporate Entity</th>
+                        <th>History</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td class="fw-semibold">{{ customer.name }}</td>
+                        <td>{{ customer.contact_info }}</td>
+                        <td>
+                            <span class="badge" style="background: var(--kq-surface-alt); color: var(--kq-text-muted); font-weight: 600;">
+                                {{ customer.account_type }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'orders:customer_order_history' customer.customer_id %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-clock-history me-1"></i>Orders
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">
+                            <div class="kq-empty-state">
+                                <i class="bi bi-person-x" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                                <p class="mt-2 mb-1 fw-semibold">No customers found</p>
+                                <p class="small text-muted">Add your first customer to get started</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Account / Contact Name</th>
-            <th>Contact Info</th>
-            <th>Corporate Entity</th>
-            <th>History Activity</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for customer in customers %}
-        <tr>
-            <td>{{ customer.name }}</td>
-            <td>{{ customer.contact_info }}</td>
-            <td>{{ customer.account_type }}</td>
-            <td><a href="{% url 'orders:customer_order_history' customer.customer_id %}">Order History</a></td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4" class="text-muted text-center py-4">No customers found.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-
+<!-- New Customer Modal -->
 <div class="modal fade" id="newCustomerModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title">New Customer</h5>
+                    <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>New Customer</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -76,7 +101,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-dark">Save Customer</button>
+                    <button type="submit" class="btn btn-dark"><i class="bi bi-check-lg me-1"></i>Save Customer</button>
                 </div>
             </form>
         </div>
