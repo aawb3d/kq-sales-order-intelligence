@@ -1,43 +1,95 @@
 {% extends "base.html" %}
 {% block page_title %}Generate Invoice Billing{% endblock %}
 {% block sidebar %}{% include "partials/sidebar_sales_agent.html" %}{% endblock %}
+
 {% block content %}
-<h4>Invoice Billing Statement</h4>
-<p class="text-muted">Review order charges and generate formal PDF document</p>
-<div class="card">
-    <div class="card-body">
-        <div class="d-flex justify-content-between mb-3">
+<a href="{% url 'orders:order_detail' order.order_id %}" class="text-decoration-none small d-inline-flex align-items-center gap-1 mb-3">
+    <i class="bi bi-arrow-left"></i> Back to Order KQ-{{ order.order_id }}
+</a>
+
+<div class="kq-page-header">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h4><i class="bi bi-receipt me-2" style="color: var(--kq-primary);"></i>Invoice Billing Statement</h4>
+            <p class="text-muted">Review order charges and generate formal PDF document</p>
+        </div>
+        <button class="btn btn-dark">
+            <i class="bi bi-filetype-pdf me-1"></i> Generate PDF
+        </button>
+    </div>
+</div>
+
+<div class="card" style="max-width: 800px;">
+    <div class="card-body p-4">
+        <!-- Invoice header -->
+        <div class="d-flex justify-content-between align-items-start mb-4 pb-3" style="border-bottom: 2px solid var(--kq-dark);">
             <div>
-                <div class="text-muted small">BILLING STATEMENT</div>
-                <h5>Invoice No: #INV-{{ order.order_id }}</h5>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="kq-brand-logo" style="background: var(--kq-primary); color: #fff; font-weight: 800; font-size: 0.7rem; padding: 0.25rem 0.5rem; border-radius: 4px;">KQ</span>
+                    <span class="fw-bold">Kenya Airways</span>
+                </div>
+                <p class="text-muted small mb-0">Sales & Order Intelligence</p>
             </div>
-            <button class="btn btn-dark">Generate PDF</button>
+            <div class="text-end">
+                <div class="text-muted small">INVOICE</div>
+                <h5 class="fw-bold mb-0">#INV-{{ order.order_id }}</h5>
+            </div>
         </div>
-        <div class="row mb-3">
-            <div class="col">
-                <div class="text-muted small">BILLED TO:</div>
+
+        <!-- Billing details -->
+        <div class="row mb-4">
+            <div class="col-sm-6">
+                <div class="text-muted small fw-bold text-uppercase mb-1">Billed To</div>
                 <div class="fw-semibold">{{ order.customer.name }}</div>
+                <div class="text-muted small">{{ order.customer.contact_info }}</div>
+                <div class="text-muted small">{{ order.customer.account_type }}</div>
             </div>
-            <div class="col">
-                <div class="text-muted small">BOOKING META:</div>
-                <div>Order Reference: KQ-{{ order.order_id }}</div>
+            <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
+                <div class="text-muted small fw-bold text-uppercase mb-1">Booking Reference</div>
+                <div class="fw-semibold">KQ-{{ order.order_id }}</div>
+                <div class="text-muted small">{{ order.order_date|date:"F d, Y" }}</div>
+                <div>
+                    <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
             </div>
         </div>
-        <table class="table">
-            <thead>
-                <tr><th>Description of Services</th><th>Qty</th><th>Unit Price (USD)</th><th>Total Amount (USD)</th></tr>
-            </thead>
-            <tbody>
-                {% for item in order.items.all %}
-                <tr>
-                    <td>{{ item.product.name }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>{{ item.unit_price }}</td>
-                    <td>{{ item.line_total }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+        <!-- Items table -->
+        <div class="table-responsive mb-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Description of Services</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-end">Unit Price (USD)</th>
+                        <th class="text-end">Total (USD)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-end">${{ item.unit_price }}</td>
+                        <td class="text-end fw-semibold">${{ item.line_total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-muted text-center py-3">No items in this order</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals -->
+        <div class="text-end pt-3" style="border-top: 2px solid var(--kq-border);">
+            <div class="text-muted small">Subtotal: <span class="fw-semibold text-dark">$0.00</span></div>
+            <div class="text-muted small">VAT (16%): <span class="fw-semibold text-dark">$0.00</span></div>
+            <div class="fs-5 mt-1">
+                Total: <span class="fw-bold" style="color: var(--kq-primary);">$0.00</span>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

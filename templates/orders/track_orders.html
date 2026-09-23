@@ -1,27 +1,75 @@
 {% extends "base.html" %}
 {% block page_title %}Track Orders{% endblock %}
 {% block sidebar %}{% include "partials/sidebar_sales_agent.html" %}{% endblock %}
+
 {% block content %}
-<h4>Orders Registry</h4>
-<p class="text-muted">Search, monitor, and filter status for all regional bookings</p>
-<div class="input-group mb-3" style="max-width: 700px;">
-    <input type="text" class="form-control" placeholder="Search by Order ID, customer name, destination...">
+<div class="kq-page-header">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h4><i class="bi bi-clipboard-data me-2" style="color: var(--kq-primary);"></i>Orders Registry</h4>
+            <p class="text-muted">Search, monitor, and filter status for all regional bookings</p>
+        </div>
+        <a href="{% url 'orders:create_order' %}" class="btn btn-dark">
+            <i class="bi bi-plus-lg me-1"></i> New Order
+        </a>
+    </div>
 </div>
-<table class="table">
-    <thead>
-        <tr><th>Order ID</th><th>Customer / Agency</th><th>Booking Date</th><th>Amount (USD)</th><th>Fulfillment Status</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
-        {% for order in orders %}
-        <tr>
-            <td>KQ-{{ order.order_id }}</td>
-            <td>{{ order.customer.name }}</td>
-            <td>{{ order.order_date|date:"Y-m-d" }}</td>
-            <td>{{ order.total_amount|default:"—" }}</td>
-            <td><span class="badge bg-secondary">{{ order.get_status_display }}</span></td>
-            <td><a href="{% url 'orders:order_detail' order.order_id %}">View Details</a></td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
+<div class="card">
+    <div class="card-body p-0">
+        <!-- Search bar -->
+        <div class="p-3" style="border-bottom: 1px solid var(--kq-border-light);">
+            <div class="input-group" style="max-width: 500px;">
+                <span class="input-group-text" style="background: var(--kq-surface-alt); border-color: var(--kq-border);">
+                    <i class="bi bi-search" style="color: var(--kq-text-muted);"></i>
+                </span>
+                <input type="text" class="form-control" placeholder="Search by Order ID, customer name, destination...">
+            </div>
+        </div>
+
+        <!-- Orders table -->
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer / Agency</th>
+                        <th>Booking Date</th>
+                        <th>Fulfillment Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td class="fw-semibold">KQ-{{ order.order_id }}</td>
+                        <td>{{ order.customer.name }}</td>
+                        <td>{{ order.order_date|date:"M d, Y" }}</td>
+                        <td>
+                            <span class="badge badge-{{ order.status }}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'orders:order_detail' order.order_id %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-eye me-1"></i>Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="kq-empty-state">
+                                <i class="bi bi-inbox" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                                <p class="mt-2 mb-1 fw-semibold">No orders yet</p>
+                                <p class="small text-muted">Create your first order to get started</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,6 +1,21 @@
-<div class="text-muted small mb-3">Sales Agent Console</div>
+<div class="kq-sidebar-label">Sales Agent Console</div>
 <ul class="nav flex-column">
-    <li class="nav-item"><a class="nav-link" href="{% url 'orders:create_order' %}">+ Create Order</a></li>
-    <li class="nav-item"><a class="nav-link" href="{% url 'orders:track_orders' %}">Track Orders</a></li>
-    <li class="nav-item"><a class="nav-link" href="{% url 'orders:customer_records' %}">Customer Records</a></li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'orders:create_order' %}">
+            <span class="nav-icon"><i class="bi bi-plus-circle"></i></span>
+            Create Order
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'orders:track_orders' %}">
+            <span class="nav-icon"><i class="bi bi-clipboard-data"></i></span>
+            Track Orders
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'orders:customer_records' %}">
+            <span class="nav-icon"><i class="bi bi-people"></i></span>
+            Customer Records
+        </a>
+    </li>
 </ul>

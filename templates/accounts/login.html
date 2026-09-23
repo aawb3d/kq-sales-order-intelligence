@@ -1,30 +1,68 @@
 {% extends "base.html" %}
 {% block title %}Login — KQ Sales & Order Intelligence{% endblock %}
+
+{% block sidebar %}{% endblock %}
+
 {% block content %}
-<div class="mx-auto" style="max-width: 400px; margin-top: 80px;">
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
-            <div class="text-center mb-3">
-                <span class="badge bg-dark fs-6">KQ</span>
-                <h5 class="mt-2 mb-0">Kenya Airways Intelligence</h5>
-                <p class="text-muted small">Sales and Order Management System</p>
+<div class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - var(--header-height) - 4rem);">
+    <div style="width: 100%; max-width: 420px;" class="stagger-fade">
+        <div class="card" style="border-radius: var(--radius-xl); box-shadow: var(--shadow-lg);">
+            <div class="card-body p-4 p-sm-5">
+                <!-- Logo & Branding -->
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3"
+                         style="width: 56px; height: 56px; background: var(--kq-primary); box-shadow: 0 4px 14px rgba(200,16,46,0.3);">
+                        <span style="color: #fff; font-weight: 800; font-size: 1.1rem; letter-spacing: 0.05em;">KQ</span>
+                    </div>
+                    <h5 class="fw-bold mb-1">Welcome Back</h5>
+                    <p class="text-muted small mb-0">Sign in to the Kenya Airways Intelligence Platform</p>
+                </div>
+
+                <!-- Error Alert -->
+                {% if form.errors %}
+                <div class="alert alert-danger d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Invalid username or password. Please verify and try again.
+                </div>
+                {% endif %}
+
+                <!-- Login Form -->
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Username or Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="background: var(--kq-surface-alt); border-color: var(--kq-border);">
+                                <i class="bi bi-person" style="color: var(--kq-text-muted);"></i>
+                            </span>
+                            <input type="text" name="username" class="form-control"
+                                   placeholder="Enter your username"
+                                   value="{{ form.username.value|default:'' }}" autofocus>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="background: var(--kq-surface-alt); border-color: var(--kq-border);">
+                                <i class="bi bi-lock" style="color: var(--kq-text-muted);"></i>
+                            </span>
+                            <input type="password" name="password" class="form-control"
+                                   placeholder="Enter your password">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100 py-2" style="font-size: 0.9rem;">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                    </button>
+                </form>
+
+                <!-- Footer -->
+                <div class="text-center mt-4 pt-3" style="border-top: 1px solid var(--kq-border-light);">
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-shield-lock me-1"></i>
+                        Internal Operations System — Authorized Personnel Only
+                    </p>
+                </div>
             </div>
-            {% if form.errors %}
-            <div class="alert alert-danger small">Invalid username or password. Please verify and try again.</div>
-            {% endif %}
-            <form method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label class="form-label">Username or Email</label>
-                    {{ form.username }}
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    {{ form.password }}
-                </div>
-                <button type="submit" class="btn btn-dark w-100">Sign In</button>
-            </form>
-            <p class="text-center text-muted small mt-3 mb-0">Internal Operations System Only</p>
         </div>
     </div>
 </div>
