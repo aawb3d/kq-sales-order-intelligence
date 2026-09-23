@@ -2,43 +2,116 @@
 {% block page_title %}Stock Levels Manager{% endblock %}
 {% block sidebar %}{% include "partials/sidebar_warehouse_officer.html" %}{% endblock %}
 {% block content %}
-<h4>Warehouse Stock Inventory</h4>
-<p class="text-muted">Monitor, reorder, and adjust physical cargo container levels and packing components</p>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0">Warehouse Stock Inventory</h4>
+        <p class="text-muted">Monitor, reorder, and adjust physical cargo container levels and packing components</p>
+    </div>
+    <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#newProductModal">+ Add Product</button>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
 <table class="table">
     <thead>
-        <tr><th>Product / Component Name</th><th>SKU Code</th><th>Qty on Hand</th><th>Reorder Level</th><th>Action</th></tr>
+        <tr>
+            <th>Product / Component Name</th>
+            <th>Unit Price</th>
+            <th>Qty on Hand</th>
+            <th>Reorder Level</th>
+            <th>Action</th>
+        </tr>
     </thead>
     <tbody>
         {% for item in stock %}
         <tr>
             <td>{{ item.product.name }}</td>
-            <td>—</td>
+            <td>${{ item.product.unit_price }}</td>
             <td class="{% if item.is_low %}text-danger fw-semibold{% endif %}">
                 {{ item.quantity_on_hand }} units{% if item.is_low %} (LOW){% endif %}
             </td>
             <td>{{ item.reorder_level }} units</td>
             <td>
-                <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#adjustStockModal">Adjust Stock</button>
+                <button
+                    class="btn btn-dark btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#adjustModal{{ item.stock_id }}"
+                >Adjust Stock</button>
             </td>
         </tr>
+
+        <div class="modal fade" id="adjustModal{{ item.stock_id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="post" action="{% url 'inventory:adjust_stock' item.stock_id %}">
+                        {% csrf_token %}
+                        <div class="modal-header">
+                            <h5 class="modal-title">Adjust Stock Quantity</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-muted small">Item: {{ item.product.name }}</p>
+                            <div class="mb-3">
+                                <label class="form-label">Current Quantity on Hand</label>
+                                <input type="text" class="form-control" value="{{ item.quantity_on_hand }} units" disabled>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Adjustment Offset (+ / -)</label>
+                                <input type="number" name="offset" class="form-control" placeholder="e.g. +38 or -10" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Reason for Adjustment</label>
+                                <select name="reason" class="form-select">
+                                    <option value="delivery">Received New Shipment Delivery</option>
+                                    <option value="correction">Inventory Count Correction</option>
+                                    <option value="damage">Damaged / Written Off</option>
+                                    <option value="dispatch">Dispatched for Order Fulfilment</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-dark">Save Adjustment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <tr><td colspan="5" class="text-muted text-center py-4">No products in inventory yet.</td></tr>
         {% endfor %}
     </tbody>
 </table>
 
-<div class="modal fade" id="adjustStockModal" tabindex="-1">
+<div class="modal fade" id="newProductModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Adjust Stock Quantity</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                {# TODO: adjustment form — current qty, offset, reason #}
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-dark">Save Adjustment</button>
-            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="add_product" value="1">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Product Name</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Unit Price (USD)</label>
+                        {{ form.unit_price }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark">Save Product</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
