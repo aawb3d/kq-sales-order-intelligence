@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Access Denied — KQ Intelligence{% endblock %}
+
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - var(--header-height) - 8rem);">
+    <div class="text-center stagger-fade">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3"
+             style="width: 64px; height: 64px; background: var(--kq-danger-bg);">
+            <i class="bi bi-shield-lock" style="color: var(--kq-danger); font-size: 1.8rem;"></i>
+        </div>
+        <h4 class="fw-bold">Access Denied</h4>
+        <p class="text-muted mb-4" style="max-width: 400px;">
+            You don't have permission to view this page. 
+            It may be restricted to a different role.
+        </p>
+        <a href="{% url 'home' %}" class="btn btn-dark">
+            <i class="bi bi-house me-1"></i> Go to My Home Page
+        </a>
+    </div>
+</div>
+{% endblock %}

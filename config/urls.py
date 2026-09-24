@@ -16,7 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from django.views.generic import RedirectView
+
+from core.views import role_home_redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,7 +25,9 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('inventory/', include('inventory.urls')),
     path('analytics/', include('analytics.urls')),
-    # Land on the dashboard by default; unauthenticated users are
-    # redirected to login by the @operations_manager_required decorator.
-    path('', RedirectView.as_view(pattern_name='analytics:dashboard', permanent=False)),
+    # Smart redirect — sends each user to their role-appropriate home page.
+    path('', role_home_redirect, name='home'),
 ]
+
+# Custom error handlers
+handler403 = 'core.views.custom_permission_denied'
