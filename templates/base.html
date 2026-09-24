@@ -116,6 +116,15 @@
                 link.setAttribute('aria-current', 'page');
             }
         });
+
+        // Fix: move modals to <body> so they escape the kq-main
+        // animation stacking context and render above the backdrop.
+        document.addEventListener('show.bs.modal', function (event) {
+            var modal = event.target;
+            if (modal.parentElement !== document.body) {
+                document.body.appendChild(modal);
+            }
+        });
     </script>
 
     {% block extra_js %}{% endblock %}
