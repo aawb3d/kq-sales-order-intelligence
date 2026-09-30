@@ -60,9 +60,12 @@
                 <h6 class="fw-bold mb-3"><i class="bi bi-lightning me-2"></i>Actions</h6>
                 <div class="d-flex gap-2 flex-wrap">
                     {% if order.status == 'pending' %}
-                    <button class="btn btn-dark btn-sm" disabled title="Coming soon">
-                        <i class="bi bi-check-circle me-1"></i>Confirm Order
-                    </button>
+                    <form method="post" action="{% url 'orders:confirm_order' order.order_id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-dark btn-sm">
+                            <i class="bi bi-check-circle me-1"></i>Confirm Order
+                        </button>
+                    </form>
                     {% endif %}
                     <a href="{% url 'orders:generate_invoice' order.order_id %}" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-receipt me-1"></i>Generate Invoice

@@ -8,64 +8,129 @@
     <p class="text-muted">Prepare a new customer booking / cargo order record</p>
 </div>
 
-<div class="card" style="max-width: 900px;">
-    <div class="card-body">
-        <div class="mb-3">
-            <label class="form-label">Customer / Account Selector</label>
-            <select class="form-select">
-                <option value="">Select an account...</option>
-            </select>
-        </div>
-
-        <div class="table-responsive mb-3">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Product / Service Line Item</th>
-                        <th style="width: 100px;">Qty</th>
-                        <th style="width: 140px;">Unit Price (USD)</th>
-                        <th style="width: 140px;">Line Total (USD)</th>
-                        <th style="width: 50px;"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {# TODO: dynamic order item rows — Phase 1 implementation #}
-                    <tr>
-                        <td colspan="5" class="text-muted text-center py-3">
-                            <i class="bi bi-cart-plus me-1"></i>Add items below
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <button class="btn btn-outline-secondary btn-sm mb-4">
-            <i class="bi bi-plus-lg me-1"></i>Add Item Line
-        </button>
-
-        <div class="rounded-3 p-3 mb-3" style="background: var(--kq-surface-alt);">
-            <div class="d-flex justify-content-between mb-1">
-                <span class="text-muted small">Subtotal</span>
-                <span class="fw-semibold">$0.00</span>
+<form method="post" id="orderForm">
+    {% csrf_token %}
+    <div class="card mb-3" style="max-width: 900px;">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Customer / Account</label>
+                {{ order_form.customer }}
+                {% if order_form.customer.errors %}
+                <div class="text-danger small mt-1">{{ order_form.customer.errors.0 }}</div>
+                {% endif %}
             </div>
-            <div class="d-flex justify-content-between mb-1">
-                <span class="text-muted small">VAT (16%)</span>
-                <span class="fw-semibold">$0.00</span>
-            </div>
-            <div class="d-flex justify-content-between pt-2" style="border-top: 1px solid var(--kq-border);">
-                <span class="fw-bold">Running Total (USD)</span>
-                <span class="fw-bold fs-5" style="color: var(--kq-primary);">$0.00</span>
-            </div>
-        </div>
 
-        <div class="d-flex gap-2 justify-content-end">
-            <button class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+            <!-- Formset management data -->
+            {{ item_formset.management_form }}
+
+            <label class="form-label fw-semibold">Order Items</label>
+            <div class="table-responsive mb-3">
+                <table class="table" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th>Product / Service Line Item</th>
+                            <th style="width: 120px;">Qty</th>
+                            <th style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                        {% for form in item_formset %}
+                        <tr class="item-row">
+                            <td>
+                                {{ form.product }}
+                                {% if form.product.errors %}
+                                <div class="text-danger small">{{ form.product.errors.0 }}</div>
+                                {% endif %}
+                                {% if form.DELETE %}
+                                <div style="display:none;">{{ form.DELETE }}</div>
+                                {% endif %}
+                                {{ form.id }}
+                            </td>
+                            <td>
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}
+                                <div class="text-danger small">{{ form.quantity.errors.0 }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-outline-danger btn-sm remove-row" title="Remove">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <button type="button" class="btn btn-outline-secondary btn-sm mb-4" id="addItemBtn">
+                <i class="bi bi-plus-lg me-1"></i>Add Item Line
             </button>
-            <button class="btn btn-dark">
-                <i class="bi bi-check-lg me-1"></i>Submit Order
-            </button>
+
+            <div class="d-flex gap-2 justify-content-end pt-3" style="border-top: 1px solid var(--kq-border-light);">
+                <a href="{% url 'orders:track_orders' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Cancel
+                </a>
+                <button type="submit" class="btn btn-dark">
+                    <i class="bi bi-check-lg me-1"></i>Submit Order
+                </button>
+            </div>
         </div>
     </div>
-</div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Dynamic formset: add/remove item rows
+    const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+    const itemsBody = document.getElementById('itemsBody');
+    const addBtn = document.getElementById('addItemBtn');
+
+    addBtn.addEventListener('click', function () {
+        const formIdx = parseInt(totalForms.value);
+        const firstRow = itemsBody.querySelector('.item-row');
+        if (!firstRow) return;
+
+        const newRow = firstRow.cloneNode(true);
+
+        // Update all input/select names and ids
+        newRow.querySelectorAll('input, select').forEach(function (el) {
+            if (el.name) {
+                el.name = el.name.replace(/-\d+-/, '-' + formIdx + '-');
+                el.id = el.id.replace(/-\d+-/, '-' + formIdx + '-');
+            }
+            if (el.type === 'number') el.value = '';
+            if (el.tagName === 'SELECT') el.selectedIndex = 0;
+            if (el.type === 'checkbox') el.checked = false;
+            if (el.type === 'hidden' && el.name.endsWith('-id')) el.value = '';
+        });
+
+        itemsBody.appendChild(newRow);
+        totalForms.value = formIdx + 1;
+    });
+
+    // Remove row
+    itemsBody.addEventListener('click', function (e) {
+        const btn = e.target.closest('.remove-row');
+        if (!btn) return;
+        const rows = itemsBody.querySelectorAll('.item-row');
+        if (rows.length <= 1) {
+            alert('You need at least one item.');
+            return;
+        }
+        btn.closest('.item-row').remove();
+        // Renumber forms
+        const remaining = itemsBody.querySelectorAll('.item-row');
+        remaining.forEach(function (row, idx) {
+            row.querySelectorAll('input, select').forEach(function (el) {
+                if (el.name) {
+                    el.name = el.name.replace(/-\d+-/, '-' + idx + '-');
+                    el.id = el.id.replace(/-\d+-/, '-' + idx + '-');
+                }
+            });
+        });
+        totalForms.value = remaining.length;
+    });
+</script>
 {% endblock %}

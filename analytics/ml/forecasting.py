@@ -8,12 +8,46 @@ architecture diagram's ML Pipeline component.
 """
 
 
+import pandas as pd
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+from statsmodels.tsa.holtwinters import SimpleExpSmoothing
+
 def forecast_demand(order_queryset, periods=30):
     """
     Fit a SARIMAX model on historical order volume and return a
     forecast for the given number of future periods.
-
-    Placeholder implementation — to be built out with statsmodels'
-    SARIMAX once historical order data is available.
     """
-    raise NotImplementedError("SARIMAX forecasting model not yet implemented")
+    try:
+        from orders.models import OrderItem
+        items = OrderItem.objects.filter(order__in=order_queryset).select_related('order')
+        if not items.exists():
+            return []
+        
+        data = []
+        for item in items:
+            data.append({'date': item.order.order_date.date(), 'quantity': item.quantity})
+            
+        df = pd.DataFrame(data)
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.groupby('date')['quantity'].sum().reset_index()
+        df.set_index('date', inplace=True)
+        df = df.asfreq('D', fill_value=0)
+        
+        if len(df) < 2:
+            return []
+
+        if len(df) > 10:
+            model = SARIMAX(df['quantity'], order=(1, 1, 1), seasonal_order=(0, 0, 0, 0))
+            fit_model = model.fit(disp=False)
+            forecast = fit_model.forecast(steps=periods)
+        else:
+            model = SimpleExpSmoothing(df['quantity'])
+            fit_model = model.fit()
+            forecast = fit_model.forecast(steps=periods)
+            
+        results = []
+        for date, qty in forecast.items():
+            results.append({'date': date.strftime('%Y-%m-%d'), 'predicted_quantity': max(0, float(qty))})
+        return results
+    except Exception as e:
+        return []

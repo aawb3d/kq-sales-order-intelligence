@@ -16,7 +16,7 @@
             <div class="d-flex align-items-start justify-content-between">
                 <div>
                     <div class="kq-stat-label">Total Sales (MTD)</div>
-                    <div class="kq-stat-value">$0.00</div>
+                    <div class="kq-stat-value">${{ mtd_revenue|floatformat:2 }}</div>
                     <div class="kq-stat-sub">Month to date revenue</div>
                 </div>
                 <div class="rounded-3 d-flex align-items-center justify-content-center"
@@ -31,7 +31,7 @@
             <div class="d-flex align-items-start justify-content-between">
                 <div>
                     <div class="kq-stat-label">Orders This Week</div>
-                    <div class="kq-stat-value">0</div>
+                    <div class="kq-stat-value">{{ weekly_orders }}</div>
                     <div class="kq-stat-sub">Active bookings</div>
                 </div>
                 <div class="rounded-3 d-flex align-items-center justify-content-center"
@@ -46,7 +46,7 @@
             <div class="d-flex align-items-start justify-content-between">
                 <div>
                     <div class="kq-stat-label">Low-Stock Alerts</div>
-                    <div class="kq-stat-value text-danger">0</div>
+                    <div class="kq-stat-value {% if low_stock_count %}text-danger{% endif %}">{{ low_stock_count }}</div>
                     <div class="kq-stat-sub">Critical inventory items</div>
                 </div>
                 <div class="rounded-3 d-flex align-items-center justify-content-center"
@@ -61,7 +61,7 @@
             <div class="d-flex align-items-start justify-content-between">
                 <div>
                     <div class="kq-stat-label">Active Customers</div>
-                    <div class="kq-stat-value">0</div>
+                    <div class="kq-stat-value">{{ active_customers }}</div>
                     <div class="kq-stat-sub">Registered accounts</div>
                 </div>
                 <div class="rounded-3 d-flex align-items-center justify-content-center"
@@ -74,46 +74,18 @@
 </div>
 
 <!-- Charts + Anomaly Panel -->
-<div class="row g-3">
-    <!-- Main charts column -->
+<div class="row g-3 mb-4">
+    <!-- Forecast Chart -->
     <div class="col-lg-8">
-        <div class="card mb-3">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h6 class="fw-bold mb-0">Cargo Sales Demand Trend (USD)</h6>
-                        <p class="text-muted small mb-0">Monthly revenue over the past 12 months</p>
-                    </div>
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-secondary active">12M</button>
-                        <button class="btn btn-outline-secondary">6M</button>
-                        <button class="btn btn-outline-secondary">30D</button>
-                    </div>
-                </div>
-                <div style="height: 280px; display: flex; align-items: center; justify-content: center;"
-                     class="border rounded-3 bg-light">
-                    <div class="text-center text-muted">
-                        <i class="bi bi-bar-chart-line" style="font-size: 2.5rem; opacity: 0.3;"></i>
-                        <p class="small mt-2 mb-0">Chart will render once ML pipeline is active</p>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="card">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h6 class="fw-bold mb-0">Top Selling Cargo Sectors</h6>
-                        <p class="text-muted small mb-0">Revenue breakdown by product category</p>
+                        <h6 class="fw-bold mb-0"><i class="bi bi-bar-chart-line me-2"></i>SARIMAX 30-Day Demand Forecast</h6>
+                        <p class="text-muted small mb-0">Predicted water order volume (units)</p>
                     </div>
                 </div>
-                <div style="height: 220px; display: flex; align-items: center; justify-content: center;"
-                     class="border rounded-3 bg-light">
-                    <div class="text-center text-muted">
-                        <i class="bi bi-pie-chart" style="font-size: 2.5rem; opacity: 0.3;"></i>
-                        <p class="small mt-2 mb-0">Sector analysis pending order data</p>
-                    </div>
-                </div>
+                <canvas id="forecastChart" height="280"></canvas>
             </div>
         </div>
     </div>
@@ -132,30 +104,135 @@
                         <span class="text-muted" style="font-size: 0.72rem;">Powered by Isolation Forest</span>
                     </div>
                 </div>
-                <p class="text-muted small">Real-time pattern tracking from incoming orders vs predictive seasonal averages.</p>
 
+                {% if anomalies %}
+                <div class="list-group list-group-flush">
+                    {% for a in anomalies %}
+                    <div class="list-group-item px-0 py-2" style="border-color: var(--kq-border-light);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="small fw-semibold">
+                                    {% if a.is_anomaly %}
+                                    <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i>
+                                    {% else %}
+                                    <i class="bi bi-check-circle text-success me-1"></i>
+                                    {% endif %}
+                                    Order #{{ a.order_id }}
+                                </div>
+                                <div class="text-muted" style="font-size: 0.72rem;">{{ a.customer_name }}</div>
+                            </div>
+                            <span class="badge {% if a.is_anomaly %}bg-danger{% else %}bg-success{% endif %}">
+                                {{ a.anomaly_score|floatformat:2 }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
                 <div class="kq-empty-state py-4">
                     <i class="bi bi-shield-check" style="font-size: 2rem; opacity: 0.3;"></i>
                     <p class="small mt-2 mb-0">No anomalies detected</p>
-                    <p class="text-muted" style="font-size: 0.72rem;">ML pipeline will populate this panel</p>
                 </div>
-
-                <div class="mt-3 pt-3" style="border-top: 1px solid var(--kq-border-light);">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="rounded-circle d-inline-block" style="width: 8px; height: 8px; background: var(--kq-success);"></span>
-                        <span class="small text-muted">System Status: Normal</span>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="rounded-circle d-inline-block" style="width: 8px; height: 8px; background: var(--kq-text-light);"></span>
-                        <span class="small text-muted">Last scan: Awaiting activation</span>
-                    </div>
-                </div>
+                {% endif %}
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Customer Segmentation -->
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h6 class="fw-bold mb-0"><i class="bi bi-people me-2"></i>K-Means Customer Segmentation (RFM Analysis)</h6>
+                <p class="text-muted small mb-0">Behavioural clustering based on Recency, Frequency, and Monetary metrics</p>
+            </div>
+        </div>
+        {% if segments %}
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Recency (days)</th>
+                        <th>Frequency</th>
+                        <th>Monetary ($)</th>
+                        <th>Segment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in segments %}
+                    <tr>
+                        <td class="fw-semibold">{{ s.customer_name }}</td>
+                        <td>{{ s.recency }}</td>
+                        <td>{{ s.frequency }}</td>
+                        <td>${{ s.monetary|floatformat:2 }}</td>
+                        <td>
+                            <span class="badge {% if 'VIP' in s.cluster_label or 'High' in s.cluster_label %}bg-success{% elif 'Risk' in s.cluster_label or 'Dormant' in s.cluster_label %}bg-warning text-dark{% else %}bg-info{% endif %}">
+                                {{ s.cluster_label }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="kq-empty-state py-4">
+            <i class="bi bi-people" style="font-size: 2rem; opacity: 0.3;"></i>
+            <p class="small mt-2 mb-0">Insufficient order data for segmentation</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/dashboard-charts.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+    const labels = {{ forecast_labels|safe }};
+    const values = {{ forecast_values|safe }};
+
+    if (labels.length > 0) {
+        const ctx = document.getElementById('forecastChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Predicted Demand (units)',
+                    data: values,
+                    borderColor: '#c8102e',
+                    backgroundColor: 'rgba(200, 16, 46, 0.08)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { maxTicksLimit: 10, font: { size: 11 } },
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { font: { size: 11 } },
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('forecastChart').parentElement.innerHTML =
+            '<div class="kq-empty-state py-5"><i class="bi bi-bar-chart-line" style="font-size:2.5rem;opacity:0.3;"></i><p class="small mt-2 mb-0">Insufficient data for forecast</p></div>';
+    }
+</script>
 {% endblock %}

@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
 from core.permissions import warehouse_officer_required
@@ -10,15 +11,35 @@ from orders.models import Order
 @warehouse_officer_required
 def confirm_fulfilment(request):
     """Figure 3.7f: Warehouse Officer — Confirm Fulfilment."""
-    pending_orders = Order.objects.filter(status=Order.Status.CONFIRMED)
+    pending_orders = Order.objects.filter(
+        status=Order.Status.CONFIRMED
+    ).select_related("customer").prefetch_related("items__product")
     return render(request, "inventory/confirm_fulfilment.html", {"orders": pending_orders})
 
 
 @warehouse_officer_required
 def confirm_order(request, order_id):
-    order = get_object_or_404(Order, pk=order_id)
-    order.update_status(Order.Status.FULFILLED)
-    messages.success(request, f"Order KQ-{order.order_id} marked as fulfilled.")
+    """Mark order as fulfilled AND deduct stock for each item."""
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items__product__stock"),
+        pk=order_id,
+    )
+
+    if order.status != Order.Status.CONFIRMED:
+        messages.warning(request, f"Order KQ-{order.order_id} is not in 'Confirmed' status.")
+        return redirect("inventory:confirm_fulfilment")
+
+    with transaction.atomic():
+        for item in order.items.all():
+            try:
+                stock = item.product.stock
+                stock.update_level(-item.quantity, reason=f"Fulfilled Order KQ-{order.order_id}")
+            except Stock.DoesNotExist:
+                pass  # Product has no stock record — skip
+
+        order.update_status(Order.Status.FULFILLED)
+
+    messages.success(request, f"Order KQ-{order.order_id} fulfilled. Stock has been deducted.")
     return redirect("inventory:confirm_fulfilment")
 
 
