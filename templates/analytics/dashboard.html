@@ -16,7 +16,7 @@
             <div class="d-flex align-items-start justify-content-between">
                 <div>
                     <div class="kq-stat-label">Total Sales (MTD)</div>
-                    <div class="kq-stat-value">${{ mtd_revenue|floatformat:2 }}</div>
+                    <div class="kq-stat-value">KSh {{ mtd_revenue|floatformat:2 }}</div>
                     <div class="kq-stat-sub">Month to date revenue</div>
                 </div>
                 <div class="rounded-3 d-flex align-items-center justify-content-center"
@@ -156,7 +156,7 @@
                         <th>Customer</th>
                         <th>Recency (days)</th>
                         <th>Frequency</th>
-                        <th>Monetary ($)</th>
+                        <th>Monetary (KSh)</th>
                         <th>Segment</th>
                     </tr>
                 </thead>
@@ -166,7 +166,7 @@
                         <td class="fw-semibold">{{ s.customer_name }}</td>
                         <td>{{ s.recency }}</td>
                         <td>{{ s.frequency }}</td>
-                        <td>${{ s.monetary|floatformat:2 }}</td>
+                        <td>KSh {{ s.monetary|floatformat:2 }}</td>
                         <td>
                             <span class="badge {% if 'VIP' in s.cluster_label or 'High' in s.cluster_label %}bg-success{% elif 'Risk' in s.cluster_label or 'Dormant' in s.cluster_label %}bg-warning text-dark{% else %}bg-info{% endif %}">
                                 {{ s.cluster_label }}

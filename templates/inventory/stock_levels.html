@@ -33,7 +33,7 @@
                     {% for item in stock %}
                     <tr>
                         <td class="fw-semibold">{{ item.product.name }}</td>
-                        <td>${{ item.product.unit_price }}</td>
+                        <td>KSh {{ item.product.unit_price }}</td>
                         <td>
                             {% if item.is_low %}
                             <span class="kq-low-stock">{{ item.quantity_on_hand }} units</span>
@@ -137,7 +137,7 @@
                         {{ form.name }}
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Unit Price (USD)</label>
+                        <label class="form-label">Unit Price (KES)</label>
                         {{ form.unit_price }}
                     </div>
                 </div>

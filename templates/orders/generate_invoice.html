@@ -79,8 +79,8 @@
                     <tr>
                         <td>{{ item.product.name }}</td>
                         <td class="text-center">{{ item.quantity }}</td>
-                        <td class="text-end">${{ item.unit_price }}</td>
-                        <td class="text-end fw-semibold">${{ item.line_total }}</td>
+                        <td class="text-end">KSh {{ item.unit_price }}</td>
+                        <td class="text-end fw-semibold">KSh {{ item.line_total }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -93,10 +93,10 @@
 
         <!-- Totals -->
         <div class="text-end pt-3" style="border-top: 2px solid var(--kq-border);">
-            <div class="text-muted small">Subtotal: <span class="fw-semibold text-dark">${{ subtotal }}</span></div>
-            <div class="text-muted small">VAT (16%): <span class="fw-semibold text-dark">${{ vat }}</span></div>
+            <div class="text-muted small">Subtotal: <span class="fw-semibold text-dark">KSh {{ subtotal }}</span></div>
+            <div class="text-muted small">VAT (16%): <span class="fw-semibold text-dark">KSh {{ vat }}</span></div>
             <div class="fs-5 mt-1">
-                Total: <span class="fw-bold" style="color: var(--kq-primary);">${{ total }}</span>
+                Total: <span class="fw-bold" style="color: var(--kq-primary);">KSh {{ total }}</span>
             </div>
         </div>
     </div>

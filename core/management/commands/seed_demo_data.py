@@ -19,14 +19,14 @@ class Command(BaseCommand):
         
         # 2. Create Products & Stock
         product_names = [
-            ("500ml Bottle Case", 10.00),
-            ("1L Bottle Case", 18.00),
-            ("5L Jerrycan", 5.00),
-            ("20L Dispenser Bottle", 15.00),
-            ("250ml Cups Case", 8.00),
-            ("Premium Glass 500ml", 25.00),
-            ("Flavored Water 500ml Case", 12.00),
-            ("10L Dispenser Box", 10.00)
+            ("500ml Bottle Case (24 Pack)", 1200.00),
+            ("1L Bottle Case (12 Pack)", 1800.00),
+            ("5L Jerrycan", 350.00),
+            ("20L Dispenser Bottle", 1800.00),
+            ("250ml Cups Case (48 Pack)", 960.00),
+            ("Premium Glass 500ml (12 Pack)", 3600.00),
+            ("Flavored Water 500ml Case (24 Pack)", 1440.00),
+            ("10L Bulk Dispenser Box", 900.00),
         ]
         products = []
         for name, price in product_names:
