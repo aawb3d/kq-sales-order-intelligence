@@ -18,10 +18,11 @@ def dashboard(request):
     week_ago = now - timedelta(days=7)
 
     # --- KPI Calculations ---
-    # Total sales (MTD) — sum of all line totals for invoiced/fulfilled orders this month
-    mtd_orders = Order.objects.filter(order_date__gte=month_start)
-    mtd_revenue = OrderItem.objects.filter(
-        order__in=mtd_orders
+    # Total sales (Last 30 days)
+    thirty_days_ago = now - timedelta(days=30)
+    recent_orders = Order.objects.filter(order_date__gte=thirty_days_ago)
+    recent_revenue = OrderItem.objects.filter(
+        order__in=recent_orders
     ).aggregate(
         total=models.Sum(models.F("quantity") * models.F("unit_price"))
     )["total"] or 0
@@ -67,7 +68,7 @@ def dashboard(request):
     forecast_values = json.dumps([round(float(row.get("predicted_quantity", 0)), 1) for row in forecast_data[:30]])
 
     context = {
-        "mtd_revenue": round(mtd_revenue, 2),
+        "recent_revenue": round(recent_revenue, 2),
         "weekly_orders": weekly_orders,
         "low_stock_count": low_stock_count,
         "active_customers": active_customers,
