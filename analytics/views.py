@@ -42,21 +42,23 @@ def dashboard(request):
     anomaly_data = []
     segmentation_data = []
 
+    all_orders = Order.objects.select_related("customer").prefetch_related("items__product").all()
+
     try:
-        from analytics.ml.forecasting import run_forecast
-        forecast_data = run_forecast()
+        from analytics.ml.forecasting import forecast_demand
+        forecast_data = forecast_demand(all_orders)
     except Exception:
         pass
 
     try:
         from analytics.ml.anomaly_detection import detect_anomalies
-        anomaly_data = detect_anomalies()
+        anomaly_data = detect_anomalies(all_orders)
     except Exception:
         pass
 
     try:
         from analytics.ml.customer_segmentation import segment_customers
-        segmentation_data = segment_customers()
+        segmentation_data = segment_customers(Customer.objects.prefetch_related("orders__items").all())
     except Exception:
         pass
 
